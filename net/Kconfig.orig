@@ -177,7 +177,6 @@ config NETFILTER_ADVANCED
 	bool "Advanced netfilter configuration"
 	depends on NETFILTER
 	default y
-	select SECURITY_ANDROID_GID_CAPABILITIES
 	help
 	  If you say Y here you can select between all the netfilter modules.
 	  If you say N the more unusual ones will not be shown and the

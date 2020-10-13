@@ -1,0 +1,29 @@
+From 91506c596892de2160799cf69282a7488fdd24ca Mon Sep 17 00:00:00 2001
+From: Bhushan Shah <bhush94@gmail.com>
+Date: Mon, 10 Jul 2017 15:04:11 +0530
+Subject: [PATCH] Select SECURITY_ANDROID_GID_CAPABILITIES when enabling
+ paranoid network
+
+This is for backward compatibilty after commit
+
+3f834597892: Introduce the SECURITY_ANDROID_GID_CAPABILITIES option
+
+Change-Id: Iaa0ca10fc1a5b3fe490363e5432d3aefe2c51674
+Signed-off-by: Bhushan Shah <bhush94@gmail.com>
+Suggested-by: Ratchanan Srirattanamet <peathot@hotmail.com>
+---
+ net/Kconfig | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/net/Kconfig b/net/Kconfig
+index b9d1e6929cd..48a69e2cab6 100644
+--- a/net/Kconfig
++++ b/net/Kconfig
+@@ -84,6 +84,7 @@ endif # if INET
+ config ANDROID_PARANOID_NETWORK
+ 	bool "Only allow certain groups to create sockets"
+ 	default y
++	select SECURITY_ANDROID_GID_CAPABILITIES
+ 	help
+ 		none
+ 

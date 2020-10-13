@@ -1,0 +1,65 @@
+From 3f8345978921875227cd20c09d6deff05778c923 Mon Sep 17 00:00:00 2001
+From: Bhushan Shah <bhush94@gmail.com>
+Date: Mon, 10 Jul 2017 14:58:00 +0530
+Subject: [PATCH] Introduce the SECURITY_ANDROID_GID_CAPABILITIES option
+
+CONFIG_ANDROID_PARANOID_NETWORK does two things, restrict certain
+actions to certain group, and grant the certain action to other group.
+But when paranoid network is disabled, 2nd part breaks where it tries to
+grant certain capabilities to other group. This results in services like
+rmt_storage and pm-service not being able to function.
+
+This change introduces the new config option
+SECURITY_ANDROID_GID_CAPABILITIES, which will grant the cap_net_raw to
+users in group net_raw (gid 3004) and cap_net_admin to users in group
+net_admin (gid 3005).
+
+Change-Id: Id89324ec99fcdb26a73388d3ba55814e222c674f
+Signed-off-by: Bhushan Shah <bhush94@gmail.com>
+Suggested-by: Ratchanan Srirattanamet <peathot@hotmail.com>
+---
+ security/Kconfig     | 8 ++++++++
+ security/commoncap.c | 4 ++--
+ 2 files changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/security/Kconfig b/security/Kconfig
+index 66a5f808297..fcd8c43ad71 100644
+--- a/security/Kconfig
++++ b/security/Kconfig
+@@ -136,6 +136,14 @@ config LSM_MMAP_MIN_ADDR
+ 	  this low address space will need the permission specific to the
+ 	  systems running LSM.
+ 
++config SECURITY_ANDROID_GID_CAPABILITIES
++	bool "Grant certain capabilities when a user in in certain group"
++	default n
++	help
++	  This option grants the certain capabilities such as CAP_NET_RAW or
++	  CAP_NET_ADMIN when user is in net_raw or net_admin group (gid 3004 and
++	  gid 3005 respectively).
++
+ source security/selinux/Kconfig
+ source security/smack/Kconfig
+ source security/tomoyo/Kconfig
+diff --git a/security/commoncap.c b/security/commoncap.c
+index 0405522995c..e42ed2fe235 100644
+--- a/security/commoncap.c
++++ b/security/commoncap.c
+@@ -31,7 +31,7 @@
+ #include <linux/binfmts.h>
+ #include <linux/personality.h>
+ 
+-#ifdef CONFIG_ANDROID_PARANOID_NETWORK
++#ifdef CONFIG_SECURITY_ANDROID_GID_CAPABILITIES
+ #include <linux/android_aid.h>
+ #endif
+ 
+@@ -82,7 +82,7 @@ int cap_capable(const struct cred *cred, struct user_namespace *targ_ns,
+ {
+ 	struct user_namespace *ns = targ_ns;
+ 
+-#ifdef CONFIG_ANDROID_PARANOID_NETWORK
++#ifdef CONFIG_SECURITY_ANDROID_GID_CAPABILITIES
+ 	if (cap == CAP_NET_RAW && in_egroup_p(AID_NET_RAW))
+ 		return 0;
+ 	if (cap == CAP_NET_ADMIN && in_egroup_p(AID_NET_ADMIN))
